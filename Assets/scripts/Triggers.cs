@@ -130,6 +130,7 @@ public class Triggers : MonoBehaviour
                 digitalButtons.pod5InUse = false;
                 digitalButtons.shipRadarMoveSpeed = 0;
                 digitalButtons.engine.Stop();
+                light.Light("/lighting fadeAdd SR1 0 0 0 0 0");
                 break;
             ///////////////////////// POSSIBLE PHIDGET /////////////////////////////////////////////
             case "Got-Toggle1":
