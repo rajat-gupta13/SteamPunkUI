@@ -44,7 +44,7 @@ public class Triggers : MonoBehaviour
         osc.SendOSCMessage("/phidget LED setAll 0");
     }
 
-    IEnumerator WaitToTrigger(string trigger, float delay)
+    public IEnumerator WaitToTrigger(string trigger, float delay)
     {
         yield return new WaitForSeconds(delay);
         Trigger(trigger);
@@ -97,6 +97,8 @@ public class Triggers : MonoBehaviour
                     audio.Play();
                     // lighting - orange all walls
                     light.Light("/lighting fadeAdd SR1 255 0 0 0 255");
+                    digitalButtons.sfx.clip = digitalButtons.sfxClips[15];
+                    digitalButtons.sfx.Play();
                     StartCoroutine(WaitToTrigger("Got-Comm2", audioFiles[0].length + 0.01f));
                 }
                 break;
@@ -118,13 +120,25 @@ public class Triggers : MonoBehaviour
                 }
                 break;
 
-
+            case "Got-ShipDocked":
+                video.PlayVideo(videoFiles[1], false);
+                digitalButtons.decreaseO2 = false;
+                digitalButtons.pod1InUse = false;
+                digitalButtons.pod2InUse = false;
+                digitalButtons.pod1InUse = false;
+                digitalButtons.pod4InUse = false;
+                digitalButtons.pod5InUse = false;
+                digitalButtons.shipRadarMoveSpeed = 0;
+                digitalButtons.engine.Stop();
+                break;
             ///////////////////////// POSSIBLE PHIDGET /////////////////////////////////////////////
             case "Got-Toggle1":
                 // turn on LED feedback
                 LEDFeedback("Toggle1", ledON);
                 digitalButtons.toggle1 = true;
                 digitalButtons.pod1InUse = true;
+                digitalButtons.sfx.clip = digitalButtons.sfxClips[0];
+                digitalButtons.sfx.Play();
                 if (digitalButtons.pod2InUse || digitalButtons.pod3InUse || digitalButtons.pod4InUse || digitalButtons.pod5InUse)
                 {
                     digitalButtons.pod2InUse = false;
@@ -140,6 +154,8 @@ public class Triggers : MonoBehaviour
                 LEDFeedback("Toggle2", ledON);
                 digitalButtons.pod2InUse = true;
                 digitalButtons.toggle2 = true;
+                digitalButtons.sfx.clip = digitalButtons.sfxClips[1];
+                digitalButtons.sfx.Play();
                 if (digitalButtons.pod1InUse || digitalButtons.pod3InUse || digitalButtons.pod4InUse || digitalButtons.pod5InUse)
                 {
                     digitalButtons.pod1InUse = false;
@@ -155,6 +171,8 @@ public class Triggers : MonoBehaviour
                 LEDFeedback("Toggle3", ledON);
                 digitalButtons.toggle3 = true;
                 digitalButtons.pod3InUse = true;
+                digitalButtons.sfx.clip = digitalButtons.sfxClips[2];
+                digitalButtons.sfx.Play();
                 if (digitalButtons.pod2InUse || digitalButtons.pod1InUse || digitalButtons.pod4InUse || digitalButtons.pod5InUse)
                 {
                     digitalButtons.pod2InUse = false;
@@ -169,6 +187,8 @@ public class Triggers : MonoBehaviour
                 // turn on LED feedback
                 LEDFeedback("Toggle4", ledON);
                 digitalButtons.pod4InUse = true;
+                digitalButtons.sfx.clip = digitalButtons.sfxClips[3];
+                digitalButtons.sfx.Play();
                 if (digitalButtons.pod2InUse || digitalButtons.pod1InUse || digitalButtons.pod3InUse || digitalButtons.pod5InUse)
                 {
                     digitalButtons.pod2InUse = false;
@@ -184,6 +204,8 @@ public class Triggers : MonoBehaviour
                 // turn on LED feedback
                 LEDFeedback("Toggle5", ledON);
                 digitalButtons.pod5InUse = true;
+                digitalButtons.sfx.clip = digitalButtons.sfxClips[4];
+                digitalButtons.sfx.Play();
                 if (digitalButtons.pod2InUse || digitalButtons.pod1InUse || digitalButtons.pod3InUse || digitalButtons.pod4InUse)
                 {
                     digitalButtons.pod2InUse = false;
@@ -284,98 +306,98 @@ public class Triggers : MonoBehaviour
             case "Got-AlClip1":
                 // turn on LED feedback
                 digitalButtons.alClip1 = true;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("AlClip1", ledON);
 
                 break;
             case "Got-AlClip2":
                 // turn on LED feedback
                 digitalButtons.alClip2 = true;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("AlClip2", ledON);
 
                 break;
             case "Got-AlClip3":
                 // turn on LED feedback
                 digitalButtons.alClip3 = true;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("AlClip3", ledON);
 
                 break;
             case "Got-AlClip4":
                 // turn on LED feedback
                 digitalButtons.alClip4 = true;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("AlClip4", ledON);
 
                 break;
             case "Lost-AlClip1":
                 // turn off LED feedback
                 digitalButtons.alClip1 = false;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("AlClip1", ledOFF);
 
                 break;
             case "Lost-AlClip2":
                 // turn off LED feedback
                 digitalButtons.alClip2 = false;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("AlClip2", ledOFF);
 
                 break;
             case "Lost-AlClip3":
                 // turn off LED feedback
                 digitalButtons.alClip3 = false;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("AlClip3", ledOFF);
 
                 break;
             case "Lost-AlClip4":
                 // turn off LED feedback
                 digitalButtons.alClip4 = false;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("AlClip4", ledOFF);
 
                 break;
             case "Got-Knife1":
                 // turn on LED feedback
                 digitalButtons.knife1 = true;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("Knife1", ledON);
 
                 break;
             case "Got-Knife2":
                 // turn on LED feedback
                 digitalButtons.knife2 = true;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("Knife2", ledON);
 
                 break;
             case "Got-Knife3":
                 // turn on LED feedback
                 digitalButtons.knife3 = true;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("Knife3", ledON);
 
                 break;
             case "Lost-Knife1":
                 // turn off LED feedback
                 digitalButtons.knife1 = false;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("Knife1", ledOFF);
 
                 break;
             case "Lost-Knife2":
                 // turn off LED feedback
                 digitalButtons.knife2 = false;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("Knife2", ledOFF);
 
                 break;
             case "Lost-Knife3":
                 // turn off LED feedback
                 digitalButtons.knife3 = false;
-                digitalButtons.Gyroscope();
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("Knife3", ledOFF);
 
                 break;

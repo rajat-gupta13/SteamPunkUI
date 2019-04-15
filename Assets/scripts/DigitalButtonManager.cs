@@ -62,7 +62,7 @@ public class DigitalButtonManager : MonoBehaviour
     public bool alClip1, alClip2, alClip3, alClip4 = false;
     [HideInInspector]
     public bool knife1, knife2, knife3 = false;
-    private bool step1, step2, step3, step4 = false;
+    private bool step1, step2, step3, step4, step5 = false;
     private bool clip75, clip50, clip25, clip0 = false;
     private bool clipHurryUp = false;
     public AudioSource sfx;
@@ -70,15 +70,25 @@ public class DigitalButtonManager : MonoBehaviour
     [HideInInspector]
     public bool dockingShip = false;
     public GameObject iSSImage;
-    public float multiplyFactor = 1.05f;
+    public float shipFullSpeed = 2.5f;
+    private bool clipEngine = false;
+    public float scaleMultiplier = 1.5f;
+    public AudioSource engine;
+    private bool finalVideo = false;
     // Use this for initialization
+
+    private void Awake()
+    {
+        shipRadarMoveSpeed = 0f;
+    }
+
     void Start()
     {
         sfx.clip = sfxClips[10];
         sfx.loop = true;
         sfx.Play();
         resetSpeed = shipRadarMoveSpeed;
-        shipRadarMoveSpeed = 0.5f;
+        shipRadarMoveSpeed = 0f;
         resetTimer = overrideTimer;
         iSSImage.transform.localScale *= 0.25f;
     }
@@ -88,7 +98,7 @@ public class DigitalButtonManager : MonoBehaviour
     {
         if (startComm1)
         {
-            shipRadarMoveSpeed = 3f;
+            shipRadarMoveSpeed = shipFullSpeed;
             StartCoroutine(AcceptIncomingComms());
             startComm1 = false;
         }
@@ -139,8 +149,21 @@ public class DigitalButtonManager : MonoBehaviour
         }
         if (shipRadarMoveSpeed > 1.0f)
         {
-            iSSImage.transform.localScale += new Vector3(0.0000375f, 0.00005f, 0.00005f);
+            if (!clipEngine)
+            {
+                //sfx.clip = sfxClips[16];
+                //sfx.loop = true;
+                //sfx.Play();
+                engine.Play();
+                clipEngine = true;
+            }
+            iSSImage.transform.localScale += new Vector3(0.000075f * scaleMultiplier, 0.0001f * scaleMultiplier, 0.0001f * scaleMultiplier);
         }
+        else {
+            engine.Stop();
+            clipEngine = false;
+        }
+
         
         if (gyroHit)
         {
@@ -183,10 +206,9 @@ public class DigitalButtonManager : MonoBehaviour
         }
         if (toggle1 && !pod1Complete && pod1InUse && overrideAccess)
         {
-            shipRadarMoveSpeed = 5f;
+            shipRadarMoveSpeed = shipFullSpeed;
             pod1Level.transform.localPosition = Vector3.MoveTowards(pod1Level.transform.localPosition, pod1Target.transform.localPosition, fuelDecreaseSpeed * Time.deltaTime);
-            sfx.clip = sfxClips[0];
-            sfx.Play();
+           
             if (pod1Level.transform.localPosition == pod1Target.transform.localPosition)
             {
                 shipRadarMoveSpeed = 0.5f;
@@ -196,10 +218,9 @@ public class DigitalButtonManager : MonoBehaviour
         }
         if (toggle2 && !pod2Complete && pod2InUse && overrideAccess)
         {
-            shipRadarMoveSpeed = 5f;
+            shipRadarMoveSpeed = shipFullSpeed;
             pod2Level.transform.localPosition = Vector3.MoveTowards(pod2Level.transform.localPosition, pod2Target.transform.localPosition, fuelDecreaseSpeed * Time.deltaTime);
-            sfx.clip = sfxClips[1];
-            sfx.Play();
+            
             if (pod2Level.transform.localPosition == pod2Target.transform.localPosition)
             {
                 shipRadarMoveSpeed = 0.5f;
@@ -209,10 +230,9 @@ public class DigitalButtonManager : MonoBehaviour
         }
         if (toggle3 && !pod3Complete && pod3InUse && overrideAccess)
         {
-            shipRadarMoveSpeed = 5f;
+            shipRadarMoveSpeed = shipFullSpeed;
             pod3Level.transform.localPosition = Vector3.MoveTowards(pod3Level.transform.localPosition, pod3Target.transform.localPosition, fuelDecreaseSpeed * Time.deltaTime);
-            sfx.clip = sfxClips[2];
-            sfx.Play();
+           
             if (pod3Level.transform.localPosition == pod3Target.transform.localPosition)
             {
                 shipRadarMoveSpeed = 0.5f;
@@ -222,10 +242,9 @@ public class DigitalButtonManager : MonoBehaviour
         }
         if (toggle4 && !pod4Complete && pod4InUse && overrideAccess)
         {
-            shipRadarMoveSpeed = 5f;
+            shipRadarMoveSpeed = shipFullSpeed;
             pod4Level.transform.localPosition = Vector3.MoveTowards(pod4Level.transform.localPosition, pod4Target.transform.localPosition, fuelDecreaseSpeed * Time.deltaTime);
-            sfx.clip = sfxClips[3];
-            sfx.Play();
+            
             if (pod4Level.transform.localPosition == pod4Target.transform.localPosition)
             {
                 shipRadarMoveSpeed = 0.5f;
@@ -235,10 +254,9 @@ public class DigitalButtonManager : MonoBehaviour
         }
         if (toggle5 && !pod5Complete && pod5InUse && overrideAccess)
         {
-            shipRadarMoveSpeed = 5f;
+            shipRadarMoveSpeed = shipFullSpeed;
             pod5Level.transform.localPosition = Vector3.MoveTowards(pod5Level.transform.localPosition, pod5Target.transform.localPosition, fuelDecreaseSpeed * Time.deltaTime);
-            sfx.clip = sfxClips[4];
-            sfx.Play();
+            
             if (pod5Level.transform.localPosition == pod5Target.transform.localPosition)
             {
                 shipRadarMoveSpeed = 0.5f;
@@ -247,8 +265,10 @@ public class DigitalButtonManager : MonoBehaviour
             }
         }
 
-        if (dockingShip && !gyroHit)
+        if (dockingShip && !gyroHit && !finalVideo)
         {
+            StartCoroutine(triggers.WaitToTrigger("Got-ShipDocked", 2.0f));
+            finalVideo = true;
 
         }
         else if (dockingShip && gyroHit)
@@ -256,33 +276,191 @@ public class DigitalButtonManager : MonoBehaviour
             Die();
         }
 
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            if (!toggle1)
+            {
+                triggers.Trigger("Got-Toggle1");
+            }
+            else
+            {
+                triggers.Trigger("Lost-Toggle1");
+            }
+            Debug.Log("Toggle1: " + toggle1);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            if (!toggle2)
+            {
+                triggers.Trigger("Got-Toggle2");
+            }
+            else
+            {
+                triggers.Trigger("Lost-Toggle2");
+            }
+            Debug.Log("Toggle2: " + toggle2);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            if (!toggle3)
+            {
+                triggers.Trigger("Got-Toggle3");
+            }
+            else
+            {
+                triggers.Trigger("Lost-Toggle3");
+            }
+            Debug.Log("Toggle3: " + toggle3);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            if (!toggle4)
+            {
+                triggers.Trigger("Got-Toggle4");
+            }
+            else
+            {
+                triggers.Trigger("Lost-Toggle4");
+            }
+            Debug.Log("Toggle4: " + toggle4);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            if (!toggle5)
+            {
+                triggers.Trigger("Got-Toggle5");
+            }
+            else
+            {
+                triggers.Trigger("Lost-Toggle5");
+            }
+            Debug.Log("Toggle5: " + toggle5);
+        }
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            if (!alClip1)
+            {
+                triggers.Trigger("Got-AlClip1");
+            }
+            else
+            {
+                triggers.Trigger("Lost-AlClip1");
+            }
+            Debug.Log("AlClip1: " + alClip1);
+        }
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            if (!alClip2)
+            {
+                triggers.Trigger("Got-AlClip2");
+            }
+            else
+            {
+                triggers.Trigger("Lost-AlClip2");
+            }
+            Debug.Log("AlClip2: " + alClip2);
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            if (!alClip3)
+            {
+                triggers.Trigger("Got-AlClip3");
+            }
+            else
+            {
+                triggers.Trigger("Lost-AlClip3");
+            }
+            Debug.Log("AlClip3: " + alClip3);
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            if (!alClip4)
+            {
+                triggers.Trigger("Got-AlClip4");
+            }
+            else
+            {
+                triggers.Trigger("Lost-AlClip4");
+            }
+            Debug.Log("AlClip4: " + alClip4);
+        }
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            if (!knife1)
+            {
+                triggers.Trigger("Got-Knife1");
+            }
+            else
+            {
+                triggers.Trigger("Lost-Knife1");
+            }
+            Debug.Log("Knife1: " + knife1);
+        }
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            if (!knife2)
+            {
+                triggers.Trigger("Got-Knife2");
+            }
+            else
+            {
+                triggers.Trigger("Lost-Knife2");
+            }
+            Debug.Log("Knife2: " + knife2);
+        }
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            if (!knife3)
+            {
+                triggers.Trigger("Got-Knife3");
+            }
+            else
+            {
+                triggers.Trigger("Lost-Knife3");
+            }
+            Debug.Log("Knife3: " + knife3);
+        }
     }
 
-    public void Gyroscope()
+    public IEnumerator Gyroscope()
     {
+        yield return new WaitForSeconds(0.1f);
         if (overrideAccess)
         {
             if (alClip3 && !alClip1 && !alClip2 && !alClip4 && knife1 && !knife2 && !knife3 && !step1)
             {
                 rotateSpeed = 1f;
                 step1 = true;
+                sfx.clip = sfxClips[14];
+                sfx.Play();
             }
-            else if (alClip3 && alClip1 && !alClip2 && !alClip4 && knife1 && !knife2 && !knife3 && step1 && !step2)
+            else if (alClip3 && !alClip1 && !alClip2 && alClip4 && knife1 && !knife2 && !knife3 && step1 && !step2)
             {
                 rotateSpeed = 0.6f;
                 step2 = true;
+                sfx.clip = sfxClips[14];
+                sfx.Play();
             }
             else if (alClip3 && alClip1 && !alClip2 && alClip4 && knife1 && !knife2 && !knife3 && step1 && step2 && !step3)
             {
                 rotateSpeed = 0.3f;
                 step3 = true;
+                sfx.clip = sfxClips[14];
+                sfx.Play();
             }
             else if (alClip3 && alClip1 && !alClip2 && alClip4 && knife1 && knife2 && !knife3 && step1 && step2 && step3 && !step4)
+            {
+                rotateSpeed = 0.2f;
+                step4 = true;
+                sfx.clip = sfxClips[14];
+                sfx.Play();
+            }
+            else if (alClip3 && alClip1 && !alClip2 && alClip4 && knife1 && knife2 && knife3 && step1 && step2 && step3 && step4 && !step5)
             {
                 rotateSpeed = 0f;
                 shipRadar.transform.localEulerAngles = new Vector3(0, 0, 0);
                 iSSImage.transform.localEulerAngles = new Vector3(0, 0, 0);
-                step4 = true;
+                step5 = true;
                 gyroHit = false;
                 sfx.clip = sfxClips[5];
                 sfx.Play();
@@ -294,6 +472,7 @@ public class DigitalButtonManager : MonoBehaviour
                 step2 = false;
                 step3 = false;
                 step4 = false;
+                step5 = false;
                 Debug.Log("Gyroscope Fix Failed");
                 sfx.clip = sfxClips[11];
                 sfx.Play();
@@ -343,8 +522,9 @@ public class DigitalButtonManager : MonoBehaviour
         triggers.Trigger("Got-incomingCall");
     }
 
-    private void Die()
+    private IEnumerator Die()
     {
+        yield return new WaitForSeconds(3.0f);
         SceneManager.LoadScene(2);
     }
 

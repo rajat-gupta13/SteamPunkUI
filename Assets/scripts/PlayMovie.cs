@@ -27,6 +27,7 @@ public class PlayMovie : MonoBehaviour {
 	}
 
 	public void PlayVideo(VideoClip movie, bool loop) {
+
 		this.gameObject.SetActive(true);
         canvas.SetActive(false);
 		videoPlayer.clip = movie;
