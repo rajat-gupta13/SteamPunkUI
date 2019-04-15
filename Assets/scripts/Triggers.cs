@@ -109,13 +109,15 @@ public class Triggers : MonoBehaviour
                     // movie - load video#0
                     //video.PlayVideo (videoFiles[0], true);    // true => loop the video
                     // audio - play audio#0
-                    //audio.clip = audioFiles[0]; // "audio name" <- add a comment to know what audio file is playing
-                    //audio.Play();
+                    audio.clip = audioFiles[1]; // "audio name" <- add a comment to know what audio file is playing
+                    audio.Play();
                     // lighting - orange all walls
                     //light.Light("/lighting fadeAdd SR1 255 0 0 0 255");
                     digitalButtons.overrideAccess = true;
+                    digitalButtons.decreaseO2 = true;
                 }
                 break;
+
 
             ///////////////////////// POSSIBLE PHIDGET /////////////////////////////////////////////
             case "Got-Toggle1":
@@ -123,49 +125,74 @@ public class Triggers : MonoBehaviour
                 LEDFeedback("Toggle1", ledON);
                 digitalButtons.toggle1 = true;
                 digitalButtons.pod1InUse = true;
-                digitalButtons.pod2InUse = false;
-                digitalButtons.pod3InUse = false;
-                digitalButtons.pod4InUse = false;
-                digitalButtons.pod5InUse = false;
+                if (digitalButtons.pod2InUse || digitalButtons.pod3InUse || digitalButtons.pod4InUse || digitalButtons.pod5InUse)
+                {
+                    digitalButtons.pod2InUse = false;
+                    digitalButtons.pod3InUse = false;
+                    digitalButtons.pod4InUse = false;
+                    digitalButtons.pod5InUse = false;
+                    audio.clip = audioFiles[2];
+                    audio.Play();
+                }
                 break;
             case "Got-Toggle2":
                 // turn on LED feedback
                 LEDFeedback("Toggle2", ledON);
                 digitalButtons.pod2InUse = true;
-                digitalButtons.pod1InUse = false;
-                digitalButtons.pod3InUse = false;
-                digitalButtons.pod4InUse = false;
-                digitalButtons.pod5InUse = false;
                 digitalButtons.toggle2 = true;
+                if (digitalButtons.pod1InUse || digitalButtons.pod3InUse || digitalButtons.pod4InUse || digitalButtons.pod5InUse)
+                {
+                    digitalButtons.pod1InUse = false;
+                    digitalButtons.pod3InUse = false;
+                    digitalButtons.pod4InUse = false;
+                    digitalButtons.pod5InUse = false;
+                    audio.clip = audioFiles[2];
+                    audio.Play();
+                }
                 break;
             case "Got-Toggle3":
                 // turn on LED feedback
                 LEDFeedback("Toggle3", ledON);
                 digitalButtons.toggle3 = true;
                 digitalButtons.pod3InUse = true;
-                digitalButtons.pod2InUse = false;
-                digitalButtons.pod1InUse = false;
-                digitalButtons.pod4InUse = false;
-                digitalButtons.pod5InUse = false;
+                if (digitalButtons.pod2InUse || digitalButtons.pod1InUse || digitalButtons.pod4InUse || digitalButtons.pod5InUse)
+                {
+                    digitalButtons.pod2InUse = false;
+                    digitalButtons.pod1InUse = false;
+                    digitalButtons.pod4InUse = false;
+                    digitalButtons.pod5InUse = false;
+                    audio.clip = audioFiles[2];
+                    audio.Play();
+                }
                 break;
             case "Got-Toggle4":
                 // turn on LED feedback
                 LEDFeedback("Toggle4", ledON);
                 digitalButtons.pod4InUse = true;
-                digitalButtons.pod2InUse = false;
-                digitalButtons.pod3InUse = false;
-                digitalButtons.pod1InUse = false;
-                digitalButtons.pod5InUse = false;
+                if (digitalButtons.pod2InUse || digitalButtons.pod1InUse || digitalButtons.pod3InUse || digitalButtons.pod5InUse)
+                {
+                    digitalButtons.pod2InUse = false;
+                    digitalButtons.pod3InUse = false;
+                    digitalButtons.pod1InUse = false;
+                    digitalButtons.pod5InUse = false;
+                    audio.clip = audioFiles[2];
+                    audio.Play();
+                }
                 digitalButtons.toggle4 = true;
                 break;
             case "Got-Toggle5":
                 // turn on LED feedback
                 LEDFeedback("Toggle5", ledON);
                 digitalButtons.pod5InUse = true;
-                digitalButtons.pod2InUse = false;
-                digitalButtons.pod3InUse = false;
-                digitalButtons.pod4InUse = false;
-                digitalButtons.pod1InUse = false;
+                if (digitalButtons.pod2InUse || digitalButtons.pod1InUse || digitalButtons.pod3InUse || digitalButtons.pod4InUse)
+                {
+                    digitalButtons.pod2InUse = false;
+                    digitalButtons.pod3InUse = false;
+                    digitalButtons.pod4InUse = false;
+                    digitalButtons.pod1InUse = false;
+                    audio.clip = audioFiles[2];
+                    audio.Play();
+                }
                 digitalButtons.toggle5 = true;
                 break;
             case "Lost-Toggle1":
@@ -256,71 +283,99 @@ public class Triggers : MonoBehaviour
                 break;
             case "Got-AlClip1":
                 // turn on LED feedback
+                digitalButtons.alClip1 = true;
+                digitalButtons.Gyroscope();
                 LEDFeedback("AlClip1", ledON);
 
                 break;
             case "Got-AlClip2":
                 // turn on LED feedback
+                digitalButtons.alClip2 = true;
+                digitalButtons.Gyroscope();
                 LEDFeedback("AlClip2", ledON);
 
                 break;
             case "Got-AlClip3":
                 // turn on LED feedback
+                digitalButtons.alClip3 = true;
+                digitalButtons.Gyroscope();
                 LEDFeedback("AlClip3", ledON);
 
                 break;
             case "Got-AlClip4":
                 // turn on LED feedback
+                digitalButtons.alClip4 = true;
+                digitalButtons.Gyroscope();
                 LEDFeedback("AlClip4", ledON);
 
                 break;
             case "Lost-AlClip1":
                 // turn off LED feedback
+                digitalButtons.alClip1 = false;
+                digitalButtons.Gyroscope();
                 LEDFeedback("AlClip1", ledOFF);
 
                 break;
             case "Lost-AlClip2":
                 // turn off LED feedback
+                digitalButtons.alClip2 = false;
+                digitalButtons.Gyroscope();
                 LEDFeedback("AlClip2", ledOFF);
 
                 break;
             case "Lost-AlClip3":
                 // turn off LED feedback
+                digitalButtons.alClip3 = false;
+                digitalButtons.Gyroscope();
                 LEDFeedback("AlClip3", ledOFF);
 
                 break;
             case "Lost-AlClip4":
                 // turn off LED feedback
+                digitalButtons.alClip4 = false;
+                digitalButtons.Gyroscope();
                 LEDFeedback("AlClip4", ledOFF);
 
                 break;
             case "Got-Knife1":
                 // turn on LED feedback
+                digitalButtons.knife1 = true;
+                digitalButtons.Gyroscope();
                 LEDFeedback("Knife1", ledON);
 
                 break;
             case "Got-Knife2":
                 // turn on LED feedback
+                digitalButtons.knife2 = true;
+                digitalButtons.Gyroscope();
                 LEDFeedback("Knife2", ledON);
 
                 break;
             case "Got-Knife3":
                 // turn on LED feedback
+                digitalButtons.knife3 = true;
+                digitalButtons.Gyroscope();
                 LEDFeedback("Knife3", ledON);
 
                 break;
             case "Lost-Knife1":
                 // turn off LED feedback
+                digitalButtons.knife1 = false;
+                digitalButtons.Gyroscope();
                 LEDFeedback("Knife1", ledOFF);
 
                 break;
             case "Lost-Knife2":
                 // turn off LED feedback
+                digitalButtons.knife2 = false;
+                digitalButtons.Gyroscope();
                 LEDFeedback("Knife2", ledOFF);
 
                 break;
             case "Lost-Knife3":
                 // turn off LED feedback
+                digitalButtons.knife3 = false;
+                digitalButtons.Gyroscope();
                 LEDFeedback("Knife3", ledOFF);
 
                 break;

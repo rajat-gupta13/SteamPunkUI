@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class DigitalButtonManager : MonoBehaviour
 {
+
 
     //public GameObject oscInput;
     //public Dropdown settingsDropdown;
@@ -25,10 +27,11 @@ public class DigitalButtonManager : MonoBehaviour
     public bool asteroidsHit = false;
     public GameObject damageIndicator;
     private bool asteroidFirst = false;
-    private bool decreaseO2 = false;
+    [HideInInspector]
+    public bool decreaseO2 = false;
     public GameObject o2Levels, o2Target;
     public float o2DecreaseSpeed = 5.6f;
-
+    
     public GameObject scanAnimation;
     private Vector3 animStart = new Vector3(-2.79f, 42, 0);
     private Vector3 animEnd = new Vector3(-2.79f, -65, 0);
@@ -55,13 +58,29 @@ public class DigitalButtonManager : MonoBehaviour
     [HideInInspector]
     public bool pod1InUse, pod2InUse, pod3InUse, pod4InUse, pod5InUse = false;
     public float fuelDecreaseSpeed = 17.7f;
-
+    [HideInInspector]
+    public bool alClip1, alClip2, alClip3, alClip4 = false;
+    [HideInInspector]
+    public bool knife1, knife2, knife3 = false;
+    private bool step1, step2, step3, step4 = false;
+    private bool clip75, clip50, clip25, clip0 = false;
+    private bool clipHurryUp = false;
+    public AudioSource sfx;
+    public AudioClip[] sfxClips;
+    [HideInInspector]
+    public bool dockingShip = false;
+    public GameObject iSSImage;
+    public float multiplyFactor = 1.05f;
     // Use this for initialization
     void Start()
     {
+        sfx.clip = sfxClips[10];
+        sfx.loop = true;
+        sfx.Play();
         resetSpeed = shipRadarMoveSpeed;
         shipRadarMoveSpeed = 0.5f;
         resetTimer = overrideTimer;
+        iSSImage.transform.localScale *= 0.25f;
     }
 
     // Update is called once per frame
@@ -84,17 +103,55 @@ public class DigitalButtonManager : MonoBehaviour
             asteroids.SetActive(false);
             shipRadarMoveSpeed = 0.5f;
             InvokeRepeating("DamagageIndicatorStatus", 0.5f, 0.5f);
-            decreaseO2 = true;
+            //decreaseO2 = true;
+
             gyroHit = true;
             triggers.Trigger("Got-ShipHit");
         }
         if (decreaseO2)
         {
             o2Levels.transform.localPosition = Vector3.MoveTowards(o2Levels.transform.localPosition, o2Target.transform.localPosition, o2DecreaseSpeed * Time.deltaTime);
+            if (o2Levels.transform.localPosition.y <= -140 && o2Levels.transform.localPosition.y >= -145 && !clip75)
+            {
+                clip75 = true;
+                sfx.clip = sfxClips[6];
+                sfx.Play();
+            }
+            else if (o2Levels.transform.localPosition.y <= -280 && o2Levels.transform.localPosition.y >= -285 && !clip50)
+            {
+                clip50 = true;
+                sfx.clip = sfxClips[7];
+                sfx.Play();
+            }
+            else if (o2Levels.transform.localPosition.y <= -420 && o2Levels.transform.localPosition.y >= -425 && !clip25)
+            {
+                clip25 = true;
+                sfx.clip = sfxClips[8];
+                sfx.Play();
+            }
+            else if (o2Levels.transform.localPosition == o2Target.transform.localPosition && !clip0)
+            {
+                clip0 = true;
+                sfx.clip = sfxClips[9];
+                sfx.Play();
+                Die();
+            }
         }
+        if (shipRadarMoveSpeed > 1.0f)
+        {
+            iSSImage.transform.localScale += new Vector3(0.0000375f, 0.00005f, 0.00005f);
+        }
+        
         if (gyroHit)
         {
+            iSSImage.transform.Rotate(Vector3.forward, rotateSpeed * UnityEngine.Random.Range(0.5f, 1), Space.Self);
             shipRadar.transform.Rotate(Vector3.forward, rotateSpeed * UnityEngine.Random.Range(0.5f, 1), Space.Self);
+            if (o2Levels.transform.localPosition.y <= -350 && !clipHurryUp)
+            {
+                sfx.clip = sfxClips[13];
+                sfx.Play();
+                clipHurryUp = true;
+            }
         }
         if (scanning && overrideAccess)
         {
@@ -119,14 +176,17 @@ public class DigitalButtonManager : MonoBehaviour
             if (overrideTimer <= 0.0f)
             {
                 overrideTimer = resetTimer;
+                sfx.clip = sfxClips[12];
+                sfx.Play();
                 terminalText.SetActive(true);
             }
         }
-        if (toggle1 && !pod1Complete && pod1InUse)
+        if (toggle1 && !pod1Complete && pod1InUse && overrideAccess)
         {
             shipRadarMoveSpeed = 5f;
             pod1Level.transform.localPosition = Vector3.MoveTowards(pod1Level.transform.localPosition, pod1Target.transform.localPosition, fuelDecreaseSpeed * Time.deltaTime);
-
+            sfx.clip = sfxClips[0];
+            sfx.Play();
             if (pod1Level.transform.localPosition == pod1Target.transform.localPosition)
             {
                 shipRadarMoveSpeed = 0.5f;
@@ -134,11 +194,12 @@ public class DigitalButtonManager : MonoBehaviour
                 pod1InUse = false;
             }
         }
-        if (toggle2 && !pod2Complete && pod2InUse)
+        if (toggle2 && !pod2Complete && pod2InUse && overrideAccess)
         {
             shipRadarMoveSpeed = 5f;
             pod2Level.transform.localPosition = Vector3.MoveTowards(pod2Level.transform.localPosition, pod2Target.transform.localPosition, fuelDecreaseSpeed * Time.deltaTime);
-
+            sfx.clip = sfxClips[1];
+            sfx.Play();
             if (pod2Level.transform.localPosition == pod2Target.transform.localPosition)
             {
                 shipRadarMoveSpeed = 0.5f;
@@ -146,11 +207,12 @@ public class DigitalButtonManager : MonoBehaviour
                 pod2InUse = false;
             }
         }
-        if (toggle3 && !pod3Complete && pod3InUse)
+        if (toggle3 && !pod3Complete && pod3InUse && overrideAccess)
         {
             shipRadarMoveSpeed = 5f;
             pod3Level.transform.localPosition = Vector3.MoveTowards(pod3Level.transform.localPosition, pod3Target.transform.localPosition, fuelDecreaseSpeed * Time.deltaTime);
-
+            sfx.clip = sfxClips[2];
+            sfx.Play();
             if (pod3Level.transform.localPosition == pod3Target.transform.localPosition)
             {
                 shipRadarMoveSpeed = 0.5f;
@@ -158,11 +220,12 @@ public class DigitalButtonManager : MonoBehaviour
                 pod3InUse = false;
             }
         }
-        if (toggle4 && !pod4Complete && pod4InUse)
+        if (toggle4 && !pod4Complete && pod4InUse && overrideAccess)
         {
             shipRadarMoveSpeed = 5f;
             pod4Level.transform.localPosition = Vector3.MoveTowards(pod4Level.transform.localPosition, pod4Target.transform.localPosition, fuelDecreaseSpeed * Time.deltaTime);
-
+            sfx.clip = sfxClips[3];
+            sfx.Play();
             if (pod4Level.transform.localPosition == pod4Target.transform.localPosition)
             {
                 shipRadarMoveSpeed = 0.5f;
@@ -170,11 +233,12 @@ public class DigitalButtonManager : MonoBehaviour
                 pod4InUse = false;
             }
         }
-        if (toggle5 && !pod5Complete && pod5InUse)
+        if (toggle5 && !pod5Complete && pod5InUse && overrideAccess)
         {
             shipRadarMoveSpeed = 5f;
             pod5Level.transform.localPosition = Vector3.MoveTowards(pod5Level.transform.localPosition, pod5Target.transform.localPosition, fuelDecreaseSpeed * Time.deltaTime);
-
+            sfx.clip = sfxClips[4];
+            sfx.Play();
             if (pod5Level.transform.localPosition == pod5Target.transform.localPosition)
             {
                 shipRadarMoveSpeed = 0.5f;
@@ -183,26 +247,56 @@ public class DigitalButtonManager : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        if (dockingShip && !gyroHit)
         {
-            if (!toggle1)
-            {
-                triggers.Trigger("Got-Toggle1");
-            }
-            else
-            {
-                triggers.Trigger("Lost-Toggle1");
-            }
+
         }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
+        else if (dockingShip && gyroHit)
         {
-            if (!toggle2)
+            Die();
+        }
+
+    }
+
+    public void Gyroscope()
+    {
+        if (overrideAccess)
+        {
+            if (alClip3 && !alClip1 && !alClip2 && !alClip4 && knife1 && !knife2 && !knife3 && !step1)
             {
-                triggers.Trigger("Got-Toggle2");
+                rotateSpeed = 1f;
+                step1 = true;
+            }
+            else if (alClip3 && alClip1 && !alClip2 && !alClip4 && knife1 && !knife2 && !knife3 && step1 && !step2)
+            {
+                rotateSpeed = 0.6f;
+                step2 = true;
+            }
+            else if (alClip3 && alClip1 && !alClip2 && alClip4 && knife1 && !knife2 && !knife3 && step1 && step2 && !step3)
+            {
+                rotateSpeed = 0.3f;
+                step3 = true;
+            }
+            else if (alClip3 && alClip1 && !alClip2 && alClip4 && knife1 && knife2 && !knife3 && step1 && step2 && step3 && !step4)
+            {
+                rotateSpeed = 0f;
+                shipRadar.transform.localEulerAngles = new Vector3(0, 0, 0);
+                iSSImage.transform.localEulerAngles = new Vector3(0, 0, 0);
+                step4 = true;
+                gyroHit = false;
+                sfx.clip = sfxClips[5];
+                sfx.Play();
+                Debug.Log("Gyroscope Fixed Successfully");
             }
             else
             {
-                triggers.Trigger("Lost-Toggle2");
+                step1 = false;
+                step2 = false;
+                step3 = false;
+                step4 = false;
+                Debug.Log("Gyroscope Fix Failed");
+                sfx.clip = sfxClips[11];
+                sfx.Play();
             }
         }
     }
@@ -249,11 +343,17 @@ public class DigitalButtonManager : MonoBehaviour
         triggers.Trigger("Got-incomingCall");
     }
 
+    private void Die()
+    {
+        SceneManager.LoadScene(2);
+    }
 
     public void AcceptedIncomingCall1()
     {
         commsButton.interactable = false;
         acceptComms.SetActive(false);
+        sfx.clip = null;
+        sfx.loop = false;
         initialCallPicked = true;
         //StartCoroutine(StartPlayerMovement());
     }

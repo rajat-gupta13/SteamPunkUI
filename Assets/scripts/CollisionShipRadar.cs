@@ -18,9 +18,14 @@ public class CollisionShipRadar : MonoBehaviour {
     private void OnTriggerEnter2D(Collider2D collision)
     {
         Debug.Log(collision.gameObject.name);
-        if (collision.gameObject.name == "Ship")
+        if (collision.gameObject.name == "AsteroidField")
         {
             digitalButtons.asteroidsHit = true;
+        }
+        else if (collision.gameObject.name == "ISS")
+        {
+            digitalButtons.dockingShip = true;
+            digitalButtons.shipRadarMoveSpeed = 0.0f;
         }
     }
 }

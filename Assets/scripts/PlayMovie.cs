@@ -6,7 +6,7 @@ using UnityEngine.Video;
 public class PlayMovie : MonoBehaviour {
 
 
-
+    public GameObject canvas;
 	private VideoPlayer videoPlayer;
 
 	// Use this for initialization
@@ -28,6 +28,7 @@ public class PlayMovie : MonoBehaviour {
 
 	public void PlayVideo(VideoClip movie, bool loop) {
 		this.gameObject.SetActive(true);
+        canvas.SetActive(false);
 		videoPlayer.clip = movie;
 		videoPlayer.isLooping = loop;
 		videoPlayer.frame = 0;
@@ -38,5 +39,6 @@ public class PlayMovie : MonoBehaviour {
     public void StopVideo() {
         videoPlayer.Stop();
         this.gameObject.SetActive(false);
+        canvas.SetActive(true);
     }
 }
