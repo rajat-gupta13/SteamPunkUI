@@ -96,7 +96,7 @@ public class Triggers : MonoBehaviour
                     audio.clip = audioFiles[0]; // "audio name" <- add a comment to know what audio file is playing
                     audio.Play();
                     // lighting - orange all walls
-                    light.Light("/lighting fadeAdd SR1 255 0 0 0 255");
+                    StartCoroutine(FlashingLights());
                     digitalButtons.sfx.clip = digitalButtons.sfxClips[15];
                     digitalButtons.sfx.Play();
                     StartCoroutine(WaitToTrigger("Got-Comm2", audioFiles[0].length + 0.01f));
@@ -130,7 +130,7 @@ public class Triggers : MonoBehaviour
                 digitalButtons.pod5InUse = false;
                 digitalButtons.shipRadarMoveSpeed = 0;
                 digitalButtons.engine.Stop();
-                light.Light("/lighting fadeAdd SR1 0 0 0 0 0");
+                light.Light("/lighting fadeAdd K 0 0 0 0 0");
                 StartCoroutine(WaitToTrigger("Got-EndGame", (float)videoFiles[1].length + 0.01f));
                 break;
 
@@ -275,26 +275,36 @@ public class Triggers : MonoBehaviour
                 break;*/
             case "Got-CoverToggle1":
                 // turn on LED feedback
+                digitalButtons.knife1 = true;
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("CoverToggle1", ledON);
 
                 break;
             case "Got-CoverToggle2":
                 // turn on LED feedback
+                digitalButtons.knife2 = true;
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("CoverToggle2", ledON);
 
                 break;
             case "Got-CoverToggle3":
                 // turn on LED feedback
+                digitalButtons.knife3 = true;
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("CoverToggle3", ledON);
 
                 break;
             case "Lost-CoverToggle1":
                 // turn off LED feedback
+                digitalButtons.knife1 = false;
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("CoverToggle1", ledOFF);
 
                 break;
             case "Lost-CoverToggle2":
                 // turn off LED feedback
+                digitalButtons.knife3 = false;
+                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("CoverToggle2", ledOFF);
 
                 break;
@@ -367,43 +377,31 @@ public class Triggers : MonoBehaviour
                 break;
             case "Got-Knife1":
                 // turn on LED feedback
-                digitalButtons.knife1 = true;
-                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("Knife1", ledON);
 
                 break;
             case "Got-Knife2":
                 // turn on LED feedback
-                digitalButtons.knife2 = true;
-                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("Knife2", ledON);
 
                 break;
             case "Got-Knife3":
                 // turn on LED feedback
-                digitalButtons.knife3 = true;
-                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("Knife3", ledON);
 
                 break;
             case "Lost-Knife1":
                 // turn off LED feedback
-                digitalButtons.knife1 = false;
-                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("Knife1", ledOFF);
 
                 break;
             case "Lost-Knife2":
                 // turn off LED feedback
-                digitalButtons.knife2 = false;
-                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("Knife2", ledOFF);
 
                 break;
             case "Lost-Knife3":
                 // turn off LED feedback
-                digitalButtons.knife3 = false;
-                StartCoroutine(digitalButtons.Gyroscope());
                 LEDFeedback("Knife3", ledOFF);
 
                 break;
@@ -502,9 +500,19 @@ public class Triggers : MonoBehaviour
         }
     }
 
-    void LEDFeedback(string tag, int value)
+    public void LEDFeedback(string tag, int value)
     {
         osc.SendOSCMessage("/phidget LED setTag " + tag + " " + value.ToString());
+    }
+
+    private IEnumerator FlashingLights()
+    {
+        while (digitalButtons.gyroHit)
+        {
+            light.Light("/lighting fadeAdd K 255 0 0 0 255");
+            yield return new WaitForSeconds(3.0f);
+            light.Light("/lighting fadeAdd K 0 0 0 0 0");
+        }
     }
 
 }

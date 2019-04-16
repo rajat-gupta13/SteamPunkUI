@@ -38,7 +38,8 @@ public class DigitalButtonManager : MonoBehaviour
     private bool movingDown = false;
     private bool scanning = false;
     public float scanAnimationSpeed = 75f;
-    private bool gyroHit = false;
+    [HideInInspector]
+    public bool gyroHit = false;
     private float rotateSpeed = 1.5f;
     [HideInInspector]
     public bool overrideAccess = false;
@@ -390,37 +391,37 @@ public class DigitalButtonManager : MonoBehaviour
         {
             if (!knife1)
             {
-                triggers.Trigger("Got-Knife1");
+                triggers.Trigger("Got-CoverToggle1");
             }
             else
             {
-                triggers.Trigger("Lost-Knife1");
+                triggers.Trigger("Lost-CoverToggle1");
             }
-            Debug.Log("Knife1: " + knife1);
+            Debug.Log("CoverToggle1: " + knife1);
         }
         if (Input.GetKeyDown(KeyCode.Y))
         {
             if (!knife2)
             {
-                triggers.Trigger("Got-Knife2");
+                triggers.Trigger("Got-CoverToggle2");
             }
             else
             {
-                triggers.Trigger("Lost-Knife2");
+                triggers.Trigger("Lost-CoverToggle2");
             }
-            Debug.Log("Knife2: " + knife2);
+            Debug.Log("CoverToggle2: " + knife2);
         }
         if (Input.GetKeyDown(KeyCode.U))
         {
             if (!knife3)
             {
-                triggers.Trigger("Got-Knife3");
+                triggers.Trigger("Got-CoverToggle3");
             }
             else
             {
-                triggers.Trigger("Lost-Knife3");
+                triggers.Trigger("Lost-CoverToggle3");
             }
-            Debug.Log("Knife3: " + knife3);
+            Debug.Log("CoverToggle3: " + knife3);
         }
     }
 
@@ -429,31 +430,33 @@ public class DigitalButtonManager : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         if (overrideAccess)
         {
-            if (alClip3 && !alClip1 && !alClip2 && !alClip4 && knife1 && !knife2 && !knife3 && !step1)
+            if (alClip3 && !alClip1 && !alClip2 && !alClip4 && !knife1 && !knife2 && !knife3 && !step1)
             {
                 rotateSpeed = 1f;
                 step1 = true;
                 sfx.clip = sfxClips[14];
                 sfx.Play();
             }
-            else if (alClip3 && !alClip1 && !alClip2 && alClip4 && knife1 && !knife2 && !knife3 && step1 && !step2)
+            else if (alClip3 && !alClip1 && !alClip2 && alClip4 && !knife1 && !knife2 && !knife3 && step1 && !step2)
             {
                 rotateSpeed = 0.6f;
                 step2 = true;
                 sfx.clip = sfxClips[14];
                 sfx.Play();
             }
-            else if (alClip3 && alClip1 && !alClip2 && alClip4 && knife1 && !knife2 && !knife3 && step1 && step2 && !step3)
+            else if (alClip3 && alClip1 && !alClip2 && alClip4 && !knife1 && !knife2 && !knife3 && step1 && step2 && !step3)
             {
                 rotateSpeed = 0.3f;
                 step3 = true;
                 sfx.clip = sfxClips[14];
+                triggers.Trigger("On-Panel3");
                 sfx.Play();
             }
-            else if (alClip3 && alClip1 && !alClip2 && alClip4 && knife1 && knife2 && !knife3 && step1 && step2 && step3 && !step4)
+            else if (alClip3 && alClip1 && !alClip2 && alClip4 && (knife1 || knife2 || knife3) && step1 && step2 && step3 && !step4)
             {
                 rotateSpeed = 0.2f;
-                step4 = true;
+                if ((knife1 && knife2) || (knife1 && knife3) || (knife2 && knife3))
+                    step4 = true;
                 sfx.clip = sfxClips[14];
                 sfx.Play();
             }
@@ -527,7 +530,14 @@ public class DigitalButtonManager : MonoBehaviour
     public IEnumerator Die()
     {
         yield return new WaitForSeconds(3.0f);
-        SceneManager.LoadScene(2);
+        if (gyroHit || decreaseO2)
+        {
+            SceneManager.LoadScene(2);
+        }
+        else
+        {
+            SceneManager.LoadScene(3);
+        }
     }
 
     public void AcceptedIncomingCall1()
