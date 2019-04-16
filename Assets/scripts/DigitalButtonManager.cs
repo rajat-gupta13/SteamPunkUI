@@ -75,6 +75,7 @@ public class DigitalButtonManager : MonoBehaviour
     public float scaleMultiplier = 1.5f;
     public AudioSource engine;
     private bool finalVideo = false;
+    private bool finalDie = false;
     // Use this for initialization
 
     private void Awake()
@@ -144,7 +145,7 @@ public class DigitalButtonManager : MonoBehaviour
                 clip0 = true;
                 sfx.clip = sfxClips[9];
                 sfx.Play();
-                Die();
+                StartCoroutine(Die());
             }
         }
         if (shipRadarMoveSpeed > 1.0f)
@@ -271,9 +272,10 @@ public class DigitalButtonManager : MonoBehaviour
             finalVideo = true;
 
         }
-        else if (dockingShip && gyroHit)
+        else if (dockingShip && gyroHit && !finalDie)
         {
-            Die();
+            StartCoroutine(Die());
+            finalDie = true;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha1))
@@ -522,7 +524,7 @@ public class DigitalButtonManager : MonoBehaviour
         triggers.Trigger("Got-incomingCall");
     }
 
-    private IEnumerator Die()
+    public IEnumerator Die()
     {
         yield return new WaitForSeconds(3.0f);
         SceneManager.LoadScene(2);

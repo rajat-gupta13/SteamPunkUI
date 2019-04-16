@@ -131,6 +131,11 @@ public class Triggers : MonoBehaviour
                 digitalButtons.shipRadarMoveSpeed = 0;
                 digitalButtons.engine.Stop();
                 light.Light("/lighting fadeAdd SR1 0 0 0 0 0");
+                StartCoroutine(WaitToTrigger("Got-EndGame", (float)videoFiles[1].length + 0.01f));
+                break;
+
+            case "Got-EndGame":
+                StartCoroutine(digitalButtons.Die());
                 break;
             ///////////////////////// POSSIBLE PHIDGET /////////////////////////////////////////////
             case "Got-Toggle1":
